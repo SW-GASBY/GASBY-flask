@@ -1,51 +1,57 @@
 from flask import Flask, request
 import numpy as np
 import cv2
-import json
+import boto3
 from ultralytics import YOLO
 from flask_cors import CORS
+from video_handler import *
 
+# AWS 자격 증명 설정
+AWS_ACCESS_KEY_ID = 'your-access-key-id'
+AWS_SECRET_ACCESS_KEY = 'your-secret-access-key'
+AWS_REGION = 'your-region'  # 예: 'us-east-1'
+
+# AWS S3 클라이언트 생성
+s3 = boto3.client(
+    's3',
+    aws_access_key_id=AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+    region_name=AWS_REGION
+)
+
+# 버킷 이름과 영상 파일 이름 설정
+BUCKET_NAME = 'your-bucket-name'
+VIDEO_FILE_KEY = 'path/to/your/video.mp4'
 app = Flask(__name__)
 CORS(app)
 
-# 학습된 모델 파일의 경로
-best_model_path = "./train8/weights/best.pt"
-
-# 학습된 모델을 로드
-best_model = YOLO(best_model_path)
-
-# 이미지를 탐지하는 함수
-def detect_objects(image, model):
-    # 이미지를 YOLO 모델에 입력
-    results = model.predict(image)
-    
-    res_json = json.loads(results[0].tojson()) #이거다. 이 두 줄이 결과창이다! 이 안에 name, class 등 정보가 담겼다.
-
-    return res_json
-
+@app.route("/yolo1")
+def test():
+    return "true"
 
 # 이미지를 업로드하는 엔드포인트
-@app.route("/fast/upload", methods=["POST"])
+@app.route("/yolo1/upload", methods=["POST"])
 def upload():
     try:
-        # 이미지 파일을 업로드 받음
-        print(request)
-        image_file = request.files["image"]
+        # Step 1:
+        # mp4 영상 s3에서 끌어오기
 
-        # 이미지 데이터를 읽어와서 배열로 변환
-        image_data = image_file.read()
-        nparr = np.frombuffer(image_data, np.uint8)
-        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        # Step 2:
+        # 가져온 영상 프레임 별로 분할
+        video = cv2.VideoCapture("resources/Short4Mosaicing.mp4")
 
-        # 이미지를 객체로 탐지
-        detections = detect_objects(image, best_model)
-        
-        print("최종 결과: ", detections)
-        print("Class name: ", detections[0]['name'])
-        print("Class number: ", detections[0]['class'])
+        video_handler = VideoHandler(video)
+        video_handler.run_detectors()
+
+        # Step 3:
+        # 프레임 별로 분할한 이미지 모델 사용하여 예측
+
+        # Step 4:
+        # 인식된 객체 포인트 json 파일로 저장.
 
         # 탐지된 객체를 반환
-        return detections
+        print('123')
+        return '123'
     except Exception as e:
         print(f"요청 처리 중 오류 발생: {str(e)}")
         return "오류", 400
