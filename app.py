@@ -23,6 +23,9 @@ def detect_objects(image, model):
 
     return res_json
 
+@app.route("/yolo1", methods=["GET"])
+def health_check():
+    return "yeah~"
 
 # 이미지를 업로드하는 엔드포인트
 @app.route("/fast/upload", methods=["POST"])
