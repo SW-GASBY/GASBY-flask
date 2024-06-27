@@ -66,12 +66,14 @@ class VideoHandler:
                 # 이미지를 객체로 탐지
                 detections = detect_objects(frame, best_model)
 
-                # 탐지 결과에 따라 바운딩 박스 그리고 라벨 작성
-                image_with_boxes = draw_boxes(frame, detections)
+                print(detections)
 
-                # 이미지를 로컬에 저장
-                output_path = './image/output_image'+str(i)+'.jpg'
-                i += 1
-                cv2.imwrite(output_path, image_with_boxes)
-                print(f"이미지 저장 완료: {output_path}")
+                # # 탐지 결과에 따라 바운딩 박스 그리고 라벨 작성
+                # image_with_boxes = draw_boxes(frame, detections)
+
+                # # 이미지를 로컬에 저장
+                # output_path = './image/output_image'+str(i)+'.jpg'
+                # i += 1
+                # cv2.imwrite(output_path, image_with_boxes)
+                # print(f"이미지 저장 완료: {output_path}")
             
