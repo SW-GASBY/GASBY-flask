@@ -8,7 +8,7 @@ import json
 from player_tracking import player_tracking
 
 # 학습된 모델 파일의 경로
-best_model_path = "yolov8x.pt"
+best_model_path = "best.pt"
 
 # 학습된 모델을 로드
 best_model = YOLO(best_model_path)

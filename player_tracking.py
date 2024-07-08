@@ -39,7 +39,7 @@ def get_player_positions(detections):
     positions = []
     bboxes = []
     for detection in detections:
-        if detection['name'] == 'person' and detection['confidence'] > 0.5:  # Confidence threshold
+        if detection['name'] == 'player' and detection['confidence'] > 0.5:  # Confidence threshold
             box = detection['box']
             x_center = (box['x1'] + box['x2']) / 2
             y_center = (box['y1'] + box['y2']) / 2
