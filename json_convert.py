@@ -17,7 +17,7 @@ def json_convert(source):
             position = player['position']
             if player_id not in player_positions:
                 player_positions[player_id] = {'player_id': player_id, 'position': []}
-            player_positions[player_id]['position'].append({'frame': frame_number, 'position': position})
+            player_positions[player_id]['position'].append({'frame': frame_number, 'position': position, 'position_name': player['position_name']})
 
     # Filter out players with positions less than or equal to 20 frames
     filtered_player_positions = [player for player in player_positions.values() if len(player['position']) > 20]

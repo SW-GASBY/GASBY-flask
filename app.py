@@ -6,15 +6,31 @@ import boto3
 import shutil
 from flask_cors import CORS
 from video_handler import *
+from dotenv import dotenv_values
 from botocore.exceptions import NoCredentialsError
+
+
+env = dotenv_values('.env')
+AWS_ACCESS_KEY = env['AWS_ACCESS_KEY_ID']
+AWS_SECRET_KEY = env['AWS_SECRET_ACCESS_KEY']
+AWS_REGION = env['AWS_REGION']
 
 # AWS S3 클라이언트 생성
 s3 = boto3.client(
     's3',
-    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-    region_name=os.getenv('AWS_REGION')
+    aws_access_key_id=AWS_ACCESS_KEY,
+    aws_secret_access_key=AWS_SECRET_KEY,
+    region_name=AWS_REGION
 )
+
+
+# # AWS S3 클라이언트 생성
+# s3 = boto3.client(
+#     's3',
+#     aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+#     aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+#     region_name=os.getenv('AWS_REGION')
+# )
 
 # 버킷 이름과 영상 파일 이름 설정
 BUCKET_NAME = 'gasby-req'
@@ -56,7 +72,9 @@ def get_video():
         # 가져온 영상 프레임 별로 분할
         # 프레임 별로 분할한 이미지 모델 사용하여 예측
         # 인식된 객체 포인트 json 파일로 저장.
-        yolo_detection(LOCAL_FILE_PATH)
+        # yolo_detection(LOCAL_FILE_PATH)
+        
+        player_tracking(os.path.dirname(LOCAL_FILE_PATH))
 
         # shutil.rmtree(local_dir)
         # 저장된 파일을 클라이언트에게 제공
