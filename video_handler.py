@@ -145,7 +145,7 @@ def check_detection_in_segmentation(detections, segmentations):
         # 바운딩 박스의 중심 좌표 계산
         box = detection['box']
         center_x = (box['x1'] + box['x2']) / 2
-        center_y = (box['y1'] + box['y2']) / 2
+        center_y = box['y2']
         center_point = Point(center_x, center_y)
         
         isInside = False
@@ -156,8 +156,11 @@ def check_detection_in_segmentation(detections, segmentations):
             
             # 바운딩 박스 중심이 세그멘테이션 폴리곤 내에 있는지 확인
             if polygon.contains(center_point):
-                print(f"Detection {detection['name']} is inside segmentation polygon.")
-                detection['position_name'] = segmentation['name']
+                if segmentation['name'] == 'basketball-court':
+                    if 'position_name' not in detection:
+                        detection['position_name'] = segmentation['name']        
+                else:
+                    detection['position_name'] = segmentation['name']
                 isInside = True
         if isInside == True:
             new_detection.append(detection)
