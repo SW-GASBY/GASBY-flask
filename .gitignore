@@ -8,6 +8,9 @@ instance/*
 .env
 yolov8x.pt
 video/
+0710 1246/
+0710 1246.zip
+uniform.pt
 
 ### Flask.Python Stack ###
 # Byte-compiled / optimized / DLL files
