@@ -78,6 +78,13 @@ def get_video():
 
         # shutil.rmtree(local_dir)
         # 저장된 파일을 클라이언트에게 제공
+
+        # 저장된 파일 s3로 업로드
+        file_name1 = 'README.md'
+        bucket_name1 = 'gasby-mot-result'
+        object_name = payload + '/README.md'  # Optional
+        s3.upload_file(file_name1, bucket_name1, object_name)
+        # 로컬파일경로 + 파일명 + 파일종류, 버킷명, s3버킷의 원하는경로 + 파일명 + 파일종류
         return '123'
     except NoCredentialsError:
         return "AWS 자격 증명이 설정되지 않았습니다.", 403
