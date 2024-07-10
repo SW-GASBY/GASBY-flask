@@ -5,6 +5,7 @@ import re
 import numpy as np
 from ultralytics import YOLO
 import json
+import pickle
 from player_tracking import player_tracking
 from shapely.geometry import Point, Polygon
 
@@ -86,51 +87,67 @@ flann = cv2.FlannBasedMatcher(index_params, search_params)
 
 list = []
 class VideoHandler:
-    def __init__(self, video):
+    def __init__(self, video, frame_skip=1):
         self.video = video
         self.frames = []
-        self.d_frames = []
+        self.frame_skip = frame_skip # frame_skip이 1이면 모든 프레임 처리, 2이면 매 2번째 프레임만 처리
 
     def run_detectors(self, source):
         i = 0
+        frame_count = 0
         while self.video.isOpened():
             ok, frame = self.video.read()
 
             if not ok:
                 break
             else:
-                # 이미지를 객체로 탐지
-                detections = detect_objects(frame, detection_model)
+                if frame_count % self.frame_skip == 0:
+                    # 프레임을 리스트에 추가
+                    self.frames.append(frame)
+                    
+                    # 이미지를 객체로 탐지
+                    detections = detect_objects(frame, detection_model)
+                    
+                    # 탐지 결과 출력
+                    print(f"Frame {frame_count} detections: {detections}")
+                    
+                    if len(detections) != 0:
+                        # 세그멘테이션 결과를 detection 결과와 사용
+                        segmentations = detect_objects(frame, segmentation_model)
+                        detections = check_detection_in_segmentation(detections, segmentations)
+                        list.append(detections)
+                        
+                    # 탐지 결과에 따라 바운딩 박스 그리고 라벨 작성
+                    image_with_boxes = draw_boxes(frame, detections)
+                    os.makedirs(source + '/image', exist_ok=True)
+
+                    # 이미지를 로컬에 저장
+                    output_path = source + '/image/output_image'+str(i)+'.jpg'
+                    i += 1
+                    cv2.imwrite(output_path, image_with_boxes)
+                    print(f"이미지 저장 완료: {output_path}")
                 
-                # print(detections)
-                if len(detections) != 0:
-                    # 세그멘테이션 결과를 detection결과와 사용
-                    segmentations = detect_objects(frame, segmentation_model)
+                frame_count += 1
 
-                    detections = check_detection_in_segmentation(detections, segmentations)
-                    
-                    list.append(detections)
-                    
-                # 탐지 결과에 따라 바운딩 박스 그리고 라벨 작성
-                image_with_boxes = draw_boxes(frame, detections)
-                os.makedirs(source + '/image', exist_ok=True)
-
-                # 이미지를 로컬에 저장
-                output_path = source + '/image/output_image'+str(i)+'.jpg'
-                i += 1
-                cv2.imwrite(output_path, image_with_boxes)
-                print(f"이미지 저장 완료: {output_path}")
-
-        # # 예시 사용법
-        # output_video_path = 'demo1.mp4'  # 출력 비디오 파일 경로
-        # frame_rate = 60  # 프레임 레이트 (FPS)
-
-        # images_to_video(image_folder, output_video_path, frame_rate)
-
-        # 함수 호출 예시
-        # print(source)
+        # JSON 파일 저장 경로 수정
         save_list_to_json(list, source + '/data.json')
-        player_tracking(source)
+        
+        # 모든 프레임을 pkl 파일로 저장
+        with open(source + '/frames.pkl', 'wb') as f:
+            pickle.dump(self.frames, f)
+
+        # player_tracking(source)
+
+        # # # 예시 사용법
+        # # output_video_path = 'demo1.mp4'  # 출력 비디오 파일 경로
+        # # frame_rate = 60  # 프레임 레이트 (FPS)
+
+        # # images_to_video(image_folder, output_video_path, frame_rate)
+
+        # # 함수 호출 예시
+        # # print(source)
+        # save_list_to_json(list, source + '/data.json')
+        # player_tracking(source)
 
 
 # JSON 파일로 저장하는 함수
