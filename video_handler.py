@@ -6,12 +6,16 @@ import numpy as np
 from ultralytics import YOLO
 import json
 from player_tracking import player_tracking
+from shapely.geometry import Point, Polygon
 
 # 학습된 모델 파일의 경로
-best_model_path = "best.pt"
+detection_model_path = "resources/weights/detection/best.pt"
+segmentation_model_path = "resources/weights/segmentation/best.pt"
+
 
 # 학습된 모델을 로드
-best_model = YOLO(best_model_path)
+detection_model = YOLO(detection_model_path)
+segmentation_model = YOLO(segmentation_model_path)
 
 # 이미지를 탐지하는 함수
 def detect_objects(image, model):
@@ -96,12 +100,17 @@ class VideoHandler:
                 break
             else:
                 # 이미지를 객체로 탐지
-                detections = detect_objects(frame, best_model)
-
+                detections = detect_objects(frame, detection_model)
+                
                 # print(detections)
                 if len(detections) != 0:
-                    list.append(detections)
+                    # 세그멘테이션 결과를 detection결과와 사용
+                    segmentations = detect_objects(frame, segmentation_model)
 
+                    detections = check_detection_in_segmentation(detections, segmentations)
+                    
+                    list.append(detections)
+                    
                 # 탐지 결과에 따라 바운딩 박스 그리고 라벨 작성
                 image_with_boxes = draw_boxes(frame, detections)
                 os.makedirs(source + '/image', exist_ok=True)
@@ -128,3 +137,32 @@ class VideoHandler:
 def save_list_to_json(list_data, file_name):
     with open(file_name, 'w', encoding='utf-8') as json_file:
         json.dump(list_data, json_file, ensure_ascii=False, indent=4)
+
+
+def check_detection_in_segmentation(detections, segmentations):
+    new_detection = []
+    for detection in detections:
+        # 바운딩 박스의 중심 좌표 계산
+        box = detection['box']
+        center_x = (box['x1'] + box['x2']) / 2
+        center_y = box['y2']
+        center_point = Point(center_x, center_y)
+        
+        isInside = False
+        for segmentation in segmentations:
+            # 세그멘테이션 폴리곤 생성
+            polygon_points = [(x, y) for x, y in zip(segmentation['segments']['x'], segmentation['segments']['y'])]
+            polygon = Polygon(polygon_points)
+            
+            # 바운딩 박스 중심이 세그멘테이션 폴리곤 내에 있는지 확인
+            if polygon.contains(center_point):
+                if segmentation['name'] == 'basketball-court':
+                    if 'position_name' not in detection:
+                        detection['position_name'] = segmentation['name']        
+                else:
+                    detection['position_name'] = segmentation['name']
+                isInside = True
+        if isInside == True:
+            new_detection.append(detection)
+            
+    return new_detection
