@@ -76,16 +76,17 @@ def get_video():
         
         # player_tracking(os.path.dirname(LOCAL_FILE_PATH))
 
-        ################################################################ 밑에 주석 풀면 로컬파일 삭제 됨. ################################################################
-        # shutil.rmtree(local_dir)
         # 저장된 파일을 클라이언트에게 제공
-
         # 저장된 파일 s3로 업로드
-        file_name1 = 'video/' + payload + '/frames.pkl'
+        file_name1 = 'video/' + payload + '/'
         bucket_name1 = 'gasby-mot-result'
-        object_name = payload + '/frames.pkl'  # Optional
-        s3.upload_file(file_name1, bucket_name1, object_name)
+        object_name = payload + '/'  # Optional
+        s3.upload_file(file_name1 + 'frames.pkl', bucket_name1, object_name + 'frames.pkl')
+        s3.upload_file(file_name1 + 'player_positions_filtered.json', bucket_name1, object_name + 'player_positions_filtered.json')
         # 로컬파일경로 + 파일명 + 파일종류, 버킷명, s3버킷의 원하는경로 + 파일명 + 파일종류
+
+        ################################################################ 밑에 주석 풀면 로컬파일 삭제 됨. ################################################################
+        shutil.rmtree(local_dir)
         return '123'
     except NoCredentialsError:
         return "AWS 자격 증명이 설정되지 않았습니다.", 403

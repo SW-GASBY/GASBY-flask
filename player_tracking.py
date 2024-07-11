@@ -137,7 +137,8 @@ def player_tracking(source):
             frame_results.append({
                 'player_id': player.player_id,
                 'position_name' : player.position_name,
-                'position': player.position
+                'position': player.position,
+                'box': player.bbox
             })
         tracked_results.append(frame_results)
 
