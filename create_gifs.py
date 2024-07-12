@@ -3,7 +3,6 @@ import json
 import os
 from PIL import Image, ImageDraw
 import cv2
-import imageio
 import numpy as np
 
 source = './video/testuuid'
