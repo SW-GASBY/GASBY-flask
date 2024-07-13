@@ -146,3 +146,5 @@ def player_tracking(source):
     with open(source + '/tracked_results.json', 'w') as f:
         json.dump(tracked_results, f, indent=4)
     json_convert(source)
+    global player_id_counter
+    player_id_counter = 0

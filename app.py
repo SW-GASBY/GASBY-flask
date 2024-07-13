@@ -37,11 +37,11 @@ BUCKET_NAME = 'gasby-req'
 app = Flask(__name__)
 CORS(app)
 
-@app.route("/yolo1", methods=["GET"])
+@app.route("/yolo-predict", methods=["GET"])
 def health_check():
     return "yeah~"
 
-@app.route("/yolo1/upload", methods=["POST"])
+@app.route("/yolo-predict/upload", methods=["POST"])
 def get_video():
     data = request.get_json()
     payload = data.get('payload') if data else None
