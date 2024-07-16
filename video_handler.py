@@ -82,12 +82,16 @@ def images_to_video(image_folder, output_video_path, frame_rate):
 # csv_file_path = "label.csv"
 
 # 유니폼 색상 분류 함수
-def classify_uniform_color(image, model):
+def classify_uniform_color(image, model, teamA, teamB):
     results = model(image)
     for result in results:
         if hasattr(result, 'probs'):
-            top_class = result.names[result.probs.top1]
-            return top_class
+            top5_list = result.probs.top5
+            for i in range(5):
+                if result.names[top5_list[i]] == teamA or result.names[top5_list[i]] == teamB:
+                    return result.names[top5_list[i]]
+            # top_class = result.names[result.probs.top1]
+            # return top_class
     return None
 
 TOPCUT = 320
@@ -104,7 +108,7 @@ class VideoHandler:
         self.frames = []
         self.frame_skip = frame_skip # frame_skip이 1이면 모든 프레임 처리, 2이면 매 2번째 프레임만 처리
 
-    def run_detectors(self, source):
+    def run_detectors(self, source, teamA, teamB):
         i = 0
         frame_count = 0
         while self.video.isOpened():
@@ -134,7 +138,7 @@ class VideoHandler:
                             cropped_image = frame[y1:y2, x1:x2]
 
                             if label == 'player':
-                                uniform_color = classify_uniform_color(cropped_image, classify_model)
+                                uniform_color = classify_uniform_color(cropped_image, classify_model, teamA, teamB)
                                 detection["uniform_color"] = uniform_color
                                 
                         list.append(detections)

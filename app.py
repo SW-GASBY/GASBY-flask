@@ -45,6 +45,9 @@ def health_check():
 def get_video():
     data = request.get_json()
     payload = data.get('payload') if data else None
+    teamA = data.get('team_a_color') if data else None
+    teamB = data.get('team_b_color') if data else None
+    
     try:
         # Step 1:
         # mp4 영상 s3에서 끌어오기
@@ -55,7 +58,7 @@ def get_video():
         file_name = ''
         if 'Contents' in response:
             files = [content['Key'] for content in response['Contents']]
-            file_name = files[1]
+            file_name = files[0]
             print(file_name)
         else:
             return jsonify({'files': []})
@@ -72,7 +75,7 @@ def get_video():
         # 가져온 영상 프레임 별로 분할
         # 프레임 별로 분할한 이미지 모델 사용하여 예측
         # 인식된 객체 포인트 json 파일로 저장.
-        yolo_detection(LOCAL_FILE_PATH)
+        yolo_detection(LOCAL_FILE_PATH, teamA, teamB)
         
         # player_tracking(os.path.dirname(LOCAL_FILE_PATH))
 
@@ -96,13 +99,13 @@ def get_video():
         return str(e), 500
 
 # yolo 호출하는 함수
-def yolo_detection(source):
+def yolo_detection(source, A, B):
     try:
         # source = './resources/Short4Mosaicing.mp4'
         video = cv2.VideoCapture(source)
 
         video_handler = VideoHandler(video)
-        video_handler.run_detectors(os.path.dirname(source))
+        video_handler.run_detectors(os.path.dirname(source), A, B)
     except Exception as e:
         print(f"요청 처리 중 오류 발생: {str(e)}")
         return "오류", 400
