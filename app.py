@@ -58,7 +58,8 @@ def get_video():
         file_name = ''
         if 'Contents' in response:
             files = [content['Key'] for content in response['Contents']]
-            file_name = files[0]
+            file_name = files[1]
+            json_file = files[0]
             print(file_name)
         else:
             return jsonify({'files': []})
@@ -69,7 +70,15 @@ def get_video():
         # S3에서 영상 파일 가져와 로컬 파일로 저장
         with open(LOCAL_FILE_PATH, 'wb') as f:
             s3.download_fileobj(BUCKET_NAME, file_name, f)
-        
+        with open('./video/' + json_file, 'wb') as f:
+            s3.download_fileobj(BUCKET_NAME, json_file, f)
+
+        # 파일을 열고 내용을 읽어옵니다
+        with open('./video/' + json_file, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+
+        teamA = data['team_a_color']
+        teamB = data['team_b_color']
 
         # Step 2: & Step 3: & Step 4:
         # 가져온 영상 프레임 별로 분할
