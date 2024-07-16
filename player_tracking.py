@@ -119,7 +119,7 @@ def track_players(prev_positions, prev_bboxes, curr_positions, curr_bboxes, posi
         players[:] = [player for player in players if player.missed_frames <= max_missed_frames]
 
 # if __name__ == "__main__":
-def player_tracking(source):
+def player_tracking(source, teamA, teamB):
     # Read data from data.json file
     with open(source + '/data.json') as f:
         frames = json.load(f)
@@ -149,6 +149,6 @@ def player_tracking(source):
     # Save the tracked results to a JSON file
     with open(source + '/tracked_results.json', 'w') as f:
         json.dump(tracked_results, f, indent=4)
-    json_convert(source)
+    json_convert(source, teamA, teamB)
     global player_id_counter
     player_id_counter = 0

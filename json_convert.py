@@ -7,7 +7,7 @@ def calculate_center_position(box):
     y_center = (box[1] + box[3]) / 2
     return [x_center, y_center]
 
-def process_tracked_data(tracked_data):
+def process_tracked_data(tracked_data, teamA, teamB):
     """Process tracked data to categorize by player_id and calculate positions."""
     player_positions = defaultdict(lambda: {'player_id': None, 'positions': [], 'uniform_colors': []})
 
@@ -30,7 +30,7 @@ def process_tracked_data(tracked_data):
     filtered_player_positions = [
         {
             'player_id': player_id,
-            'uniform_color': Counter(data['uniform_colors']).most_common(1)[0][0],
+            'team': 'A' if Counter(data['uniform_colors']).most_common(1)[0][0] == teamA else 'B',
             'positions': data['positions']
         }
         for player_id, data in player_positions.items()
@@ -39,14 +39,14 @@ def process_tracked_data(tracked_data):
 
     return filtered_player_positions
 
-def json_convert(source):
+def json_convert(source, teamA, teamB):
     # Load the tracked results data from the file
     file_path = f'{source}/tracked_results.json'
     with open(file_path, 'r') as file:
         tracked_data = json.load(file)
 
     # Process the tracked data
-    filtered_player_positions = process_tracked_data(tracked_data)
+    filtered_player_positions = process_tracked_data(tracked_data, teamA, teamB)
 
     # Save the filtered result to a new JSON file
     output_file_path = f'{source}/player_positions_filtered.json'

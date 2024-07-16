@@ -162,7 +162,7 @@ class VideoHandler:
         with open(source + '/frames.pkl', 'wb') as f:
             pickle.dump(self.frames, f)
 
-        player_tracking(source)
+        player_tracking(source, teamA, teamB)
 
 
 # JSON 파일로 저장하는 함수
