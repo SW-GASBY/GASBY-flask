@@ -41,7 +41,7 @@ def draw_red_dot(image_path, position, position_name):
 # Generate GIFs for each player
 for player in player_positions:
     player_id = player['player_id']
-    positions = player['position']
+    positions = player['positions']
     
     frames = []
     for frame_data in positions:

@@ -81,7 +81,7 @@ def get_video():
         file_name1 = 'video/' + payload + '/'
         bucket_name1 = 'gasby-mot-result'
         object_name = payload + '/'  # Optional
-        s3.upload_file(file_name1 + 'frames.pkl', bucket_name1, object_name + 'frames.pkl')
+        # s3.upload_file(file_name1 + 'frames.pkl', bucket_name1, object_name + 'frames.pkl')
         s3.upload_file(file_name1 + 'player_positions_filtered.json', bucket_name1, object_name + 'player_positions_filtered.json')
         # 로컬파일경로 + 파일명 + 파일종류, 버킷명, s3버킷의 원하는경로 + 파일명 + 파일종류
 

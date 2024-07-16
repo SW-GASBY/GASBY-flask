@@ -12,11 +12,12 @@ from shapely.geometry import Point, Polygon
 # 학습된 모델 파일의 경로
 detection_model_path = "resources/weights/detection/best.pt"
 segmentation_model_path = "resources/weights/segmentation/best.pt"
-
+classify_model_path = "resources/weights/classify/best.pt"
 
 # 학습된 모델을 로드
 detection_model = YOLO(detection_model_path)
 segmentation_model = YOLO(segmentation_model_path)
+classify_model = YOLO(classify_model_path)
 
 # 이미지를 탐지하는 함수
 def detect_objects(image, model):
@@ -32,7 +33,6 @@ def draw_boxes(image, detections):
     for detection in detections:
         box = detection['box']
         label = detection['name']
-        confidence = detection['confidence']
 
         x1, y1 = int(box['x1']), int(box['y1'])
         x2, y2 = int(box['x2']), int(box['y2'])
@@ -40,8 +40,11 @@ def draw_boxes(image, detections):
         # 바운딩 박스 그리기
         cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
-        # 라벨 작성
-        label_text = f"{label} ({confidence:.2f})"
+        if label == "player":
+            confidence = detection['uniform_color']
+            label_text = f"{label} ({confidence})"
+        else: # 라벨 작성
+            label_text = f"{label}"
         cv2.putText(image, label_text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
     return image
@@ -77,6 +80,15 @@ def images_to_video(image_folder, output_video_path, frame_rate):
     video.release()
 
 # csv_file_path = "label.csv"
+
+# 유니폼 색상 분류 함수
+def classify_uniform_color(image, model):
+    results = model(image)
+    for result in results:
+        if hasattr(result, 'probs'):
+            top_class = result.names[result.probs.top1]
+            return top_class
+    return None
 
 TOPCUT = 320
 
@@ -115,6 +127,16 @@ class VideoHandler:
                         # 세그멘테이션 결과를 detection 결과와 사용
                         segmentations = detect_objects(frame, segmentation_model)
                         detections = check_detection_in_segmentation(detections, segmentations)
+                        for detection in detections:
+                            box = detection['box']
+                            label = detection['name']
+                            x1, y1, x2, y2 = map(int, [box['x1'], box['y1'], box['x2'], box['y2']])
+                            cropped_image = frame[y1:y2, x1:x2]
+
+                            if label == 'player':
+                                uniform_color = classify_uniform_color(cropped_image, classify_model)
+                                detection["uniform_color"] = uniform_color
+                                
                         list.append(detections)
                         
                     # 탐지 결과에 따라 바운딩 박스 그리고 라벨 작성

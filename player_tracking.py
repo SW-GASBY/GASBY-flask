@@ -1,4 +1,3 @@
-# Classify objects and group them together with people who are considered similar.
 import json
 import numpy as np
 import cv2
@@ -25,7 +24,7 @@ class KalmanFilter:
         self.kalman.correct(measurement)
 
 class Player:
-    def __init__(self, player_id, initial_position, bbox, position_name):
+    def __init__(self, player_id, initial_position, bbox, position_name, uniform_color):
         # Initialize a player with a unique ID and initial position
         self.player_id = player_id
         self.kalman_filter = KalmanFilter()
@@ -33,6 +32,7 @@ class Player:
         self.position = initial_position
         self.position_name = position_name
         self.bbox = bbox
+        self.uniform_color = uniform_color
         self.missed_frames = 0
 
 def get_player_positions(detections):
@@ -40,6 +40,7 @@ def get_player_positions(detections):
     positions = []
     bboxes = []
     position_names = []
+    uniform_colors = []
     for detection in detections:
         if detection['name'] == 'player' and detection['confidence'] > 0.5:  # Confidence threshold
             box = detection['box']
@@ -48,7 +49,8 @@ def get_player_positions(detections):
             positions.append((x_center, y_center))
             bboxes.append((box['x1'], box['y1'], box['x2'], box['y2']))
             position_names.append(detection['position_name'])
-    return positions, bboxes, position_names
+            uniform_colors.append(detection['uniform_color'])
+    return positions, bboxes, position_names, uniform_colors
 
 def compute_iou(boxA, boxB):
     # Compute the Intersection over Union (IoU) of two bounding boxes
@@ -80,12 +82,12 @@ players = []
 player_id_counter = 0
 max_missed_frames = 5
 
-def track_players(prev_positions, prev_bboxes, curr_positions, curr_bboxes, position_names):
+def track_players(prev_positions, prev_bboxes, curr_positions, curr_bboxes, position_names, uniform_colors):
     global player_id_counter
     if not players:
         # If no players are being tracked, initialize them
-        for pos, bbox, position_name in zip(curr_positions, curr_bboxes, position_names):
-            players.append(Player(player_id_counter, pos, bbox, position_name))
+        for pos, bbox, position_name, uniform_color in zip(curr_positions, curr_bboxes, position_names, uniform_colors):
+            players.append(Player(player_id_counter, pos, bbox, position_name, uniform_color))
             player_id_counter += 1
     else:
         # Predict player positions and match them with the current positions
@@ -93,19 +95,20 @@ def track_players(prev_positions, prev_bboxes, curr_positions, curr_bboxes, posi
         row_ind, col_ind, cost_matrix = match_players([player.bbox for player in players], curr_bboxes)
 
         assigned = set()
-        for r, c, position_name in zip(row_ind, col_ind, position_names):
+        for r, c in zip(row_ind, col_ind):
             if -cost_matrix[r, c] > 0.3:  # IoU threshold to consider a match valid
                 players[r].kalman_filter.correct(curr_positions[c][0], curr_positions[c][1])
                 players[r].position = curr_positions[c]
                 players[r].bbox = curr_bboxes[c]
                 players[r].missed_frames = 0
-                players[r].position_name = position_name
+                players[r].position_name = position_names[c]
+                players[r].uniform_color = uniform_colors[c]
                 assigned.add(c)
 
         # Add new players for unmatched positions
-        for i, (pos, bbox, position_name) in enumerate(zip(curr_positions, curr_bboxes, position_names)):
+        for i, (pos, bbox, position_name, uniform_color) in enumerate(zip(curr_positions, curr_bboxes, position_names, uniform_colors)):
             if i not in assigned:
-                players.append(Player(player_id_counter, pos, bbox, position_name))
+                players.append(Player(player_id_counter, pos, bbox, position_name, uniform_color))
                 player_id_counter += 1
 
         # Update missed frames and remove players that are no longer in the current frame for a certain period
@@ -125,20 +128,21 @@ def player_tracking(source):
 
     # Process each frame and track player positions
     for frame_index, frame_data in enumerate(frames):
-        curr_positions, curr_bboxes, position_names = get_player_positions(frame_data)
+        curr_positions, curr_bboxes, position_names, uniform_colors = get_player_positions(frame_data)
         prev_positions = [player.position for player in players]
         prev_bboxes = [player.bbox for player in players]
         
-        track_players(prev_positions, prev_bboxes, curr_positions, curr_bboxes, position_names)
+        track_players(prev_positions, prev_bboxes, curr_positions, curr_bboxes, position_names, uniform_colors)
 
         # Store the current positions of each player
         frame_results = []
         for player in players:
             frame_results.append({
                 'player_id': player.player_id,
-                'position_name' : player.position_name,
+                'position_name': player.position_name,
                 'position': player.position,
-                'box': player.bbox
+                'box': player.bbox,
+                'uniform_color': player.uniform_color
             })
         tracked_results.append(frame_results)
 
