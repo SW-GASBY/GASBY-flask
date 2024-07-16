@@ -1,4 +1,3 @@
-# Classify objects and group them together with people who are considered similar.
 import json
 import numpy as np
 import cv2
@@ -32,8 +31,8 @@ class Player:
         self.kalman_filter.correct(initial_position[0], initial_position[1])
         self.position = initial_position
         self.position_name = position_name
-        self.uniform_color = uniform_color
         self.bbox = bbox
+        self.uniform_color = uniform_color
         self.missed_frames = 0
 
 def get_player_positions(detections):
@@ -96,14 +95,14 @@ def track_players(prev_positions, prev_bboxes, curr_positions, curr_bboxes, posi
         row_ind, col_ind, cost_matrix = match_players([player.bbox for player in players], curr_bboxes)
 
         assigned = set()
-        for r, c, position_name, uniform_color in zip(row_ind, col_ind, position_names, uniform_colors):
+        for r, c in zip(row_ind, col_ind):
             if -cost_matrix[r, c] > 0.3:  # IoU threshold to consider a match valid
                 players[r].kalman_filter.correct(curr_positions[c][0], curr_positions[c][1])
                 players[r].position = curr_positions[c]
                 players[r].bbox = curr_bboxes[c]
                 players[r].missed_frames = 0
-                players[r].position_name = position_name
-                players[r].uniform_color = uniform_color
+                players[r].position_name = position_names[c]
+                players[r].uniform_color = uniform_colors[c]
                 assigned.add(c)
 
         # Add new players for unmatched positions
@@ -140,10 +139,10 @@ def player_tracking(source):
         for player in players:
             frame_results.append({
                 'player_id': player.player_id,
-                'position_name' : player.position_name,
-                'uniform_color' : player.uniform_color,
+                'position_name': player.position_name,
                 'position': player.position,
-                'box': player.bbox
+                'box': player.bbox,
+                'uniform_color': player.uniform_color
             })
         tracked_results.append(frame_results)
 
