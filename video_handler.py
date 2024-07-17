@@ -38,14 +38,14 @@ def draw_boxes(image, detections):
         x2, y2 = int(box['x2']), int(box['y2'])
 
         # 바운딩 박스 그리기
-        cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+        # cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
         if label == "player":
             confidence = detection['uniform_color']
             label_text = f"{label} ({confidence})"
         else: # 라벨 작성
             label_text = f"{label}"
-        cv2.putText(image, label_text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+        # cv2.putText(image, label_text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
     return image
 
