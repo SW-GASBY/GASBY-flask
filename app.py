@@ -43,6 +43,9 @@ def health_check():
 
 @app.route("/yolo-predict/upload", methods=["POST"])
 def get_video():
+    # 요청 수신 시간을 기록합니다.
+    start_time = time.time()
+
     data = request.get_json()
     payload = data.get('payload') if data else None
     teamA = data.get('team_a_color') if data else None
@@ -79,6 +82,7 @@ def get_video():
 
         teamA = data['team_a_color']
         teamB = data['team_b_color']
+        teamB = 'White'
 
         # Step 2: & Step 3: & Step 4:
         # 가져온 영상 프레임 별로 분할
@@ -99,6 +103,19 @@ def get_video():
 
         ################################################################ 밑에 주석 풀면 로컬파일 삭제 됨. ################################################################
         shutil.rmtree(local_dir)
+        # 예제 응답 데이터
+        response_data = {"message": "Received"}
+        
+        # 요청 처리 종료 시간을 기록합니다.
+        end_time = time.time()
+        
+        # 걸린 시간을 계산합니다.
+        elapsed_time = end_time - start_time
+        
+        # 응답 데이터에 소요 시간을 추가합니다.
+        response_data["elapsed_time"] = elapsed_time
+        
+        return jsonify(response_data)
         return '123'
     except NoCredentialsError:
         return "AWS 자격 증명이 설정되지 않았습니다.", 403
@@ -119,6 +136,28 @@ def yolo_detection(source, A, B):
         print(f"요청 처리 중 오류 발생: {str(e)}")
         return "오류", 400
 
+import time
+
+@app.route('/api/time', methods=['POST'])
+def api_time():
+    # 요청 수신 시간을 기록합니다.
+    start_time = time.time()
+    
+    # 실제로 처리할 로직을 여기에 추가합니다.
+    data = request.json
+    # 예제 응답 데이터
+    response_data = {"message": "Received", "data": data}
+    
+    # 요청 처리 종료 시간을 기록합니다.
+    end_time = time.time()
+    
+    # 걸린 시간을 계산합니다.
+    elapsed_time = end_time - start_time
+    
+    # 응답 데이터에 소요 시간을 추가합니다.
+    response_data["elapsed_time"] = elapsed_time
+    
+    return jsonify(response_data)
 
 if __name__ == "__main__":
     app.run()
