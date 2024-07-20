@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw
 import cv2
 import numpy as np
 
-source = './video/testuuid'
+source = './video/b6a4e05c-13e6-4441-926c-c14d1abf0ffe'
 # Load player positions from the JSON file
 with open(source + '/player_positions_filtered.json', 'r') as file:
     player_positions = json.load(file)

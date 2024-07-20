@@ -31,11 +31,17 @@ class Player:
         self.uniform_color = uniform_color
         self.missed_frames = 0
 
+import math
+def calculate_distance(x1, y1, x2, y2):
+    distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+    return distance
+
 def get_player_positions(detections):
     positions = []
     bboxes = []
     position_names = []
     uniform_colors = []
+    basketball_positions = []
     for detection in detections:
         if detection['name'] == 'player' and detection['confidence'] > 0.5:
             box = detection['box']
@@ -45,7 +51,29 @@ def get_player_positions(detections):
             bboxes.append((box['x1'], box['y1'], box['x2'], box['y2']))
             position_names.append(detection['position_name'])
             uniform_colors.append(detection['uniform_color'])
-    return positions, bboxes, position_names, uniform_colors
+        elif detection['name'] == 'basketball':
+            basketball_box = detection['box']
+
+            x_center = (basketball_box['x1'] + basketball_box['x2']) / 2
+            y_center = (basketball_box['y1'] + basketball_box['y2']) / 2
+
+            basketball_positions.append({
+                "basketball": detection,
+                "center": (x_center, y_center)
+            })
+    
+    for index, basketball in enumerate(basketball_positions):
+        min_dis = 0
+        min_ind = -1
+        for position_index, position in enumerate(positions):
+            dis = calculate_distance(position[0], position[1], basketball['center'][0], basketball['center'][1])
+            if min_dis > dis or min_ind == -1:
+                min_dis = dis
+                min_ind = position_index
+        basketball_positions[index]['player_bbox'] = bboxes[min_ind]
+        basketball_positions[index]['dis'] = min_dis
+
+    return positions, bboxes, position_names, uniform_colors, basketball_positions
 
 def compute_iou(boxA, boxB):
     xA = max(boxA[0], boxB[0])
@@ -67,7 +95,7 @@ def match_players(predicted_positions, curr_bboxes):
     return row_ind, col_ind, cost_matrix
 
 MAX_MISSED_FRAMES = 5
-def track_players(players, player_id_counter, curr_positions, curr_bboxes, position_names, uniform_colors):
+def track_players(players, player_id_counter, curr_positions, curr_bboxes, position_names, uniform_colors ):
     if not players:
         for pos, bbox, position_name, uniform_color in zip(curr_positions, curr_bboxes, position_names, uniform_colors):
             players.append(Player(player_id_counter, pos, bbox, position_name, uniform_color))
@@ -100,12 +128,12 @@ def player_tracking(source, teamA, teamB):
         frames = json.load(f)
 
     tracked_results = []
+    ball_results = []
     players = []
     player_id_counter = 0
-    max_missed_frames = 5
 
     for frame_index, frame_data in enumerate(frames):
-        curr_positions, curr_bboxes, position_names, uniform_colors = get_player_positions(frame_data)
+        curr_positions, curr_bboxes, position_names, uniform_colors, basketball_positions = get_player_positions(frame_data)
         player_id_counter = track_players(players, player_id_counter, curr_positions, curr_bboxes, position_names, uniform_colors)
         frame_results = []
         for player in players:
@@ -116,8 +144,18 @@ def player_tracking(source, teamA, teamB):
                 'box': player.bbox,
                 'uniform_color': player.uniform_color
             })
+            for basketball in basketball_positions:
+                if basketball['player_bbox'] == player.bbox:
+                    ball_results.append({
+                        'player_id': player.player_id,
+                        'ball': basketball['basketball'],
+                        'dis': basketball['dis'],
+                        'frame': frame_index
+                    })
         tracked_results.append(frame_results)
 
     with open(source + '/tracked_results.json', 'w') as f:
         json.dump(tracked_results, f, indent=4)
+    with open(source + '/ball.json', 'w') as f:
+        json.dump(ball_results, f, indent=4)
     json_convert(source, teamA, teamB)

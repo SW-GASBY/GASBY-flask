@@ -174,27 +174,31 @@ def save_list_to_json(list_data, file_name):
 def check_detection_in_segmentation(detections, segmentations):
     new_detection = []
     for detection in detections:
-        # 바운딩 박스의 중심 좌표 계산
-        box = detection['box']
-        center_x = (box['x1'] + box['x2']) / 2
-        center_y = box['y2']
-        center_point = Point(center_x, center_y)
-        
-        isInside = False
-        for segmentation in segmentations:
-            # 세그멘테이션 폴리곤 생성
-            polygon_points = [(x, y) for x, y in zip(segmentation['segments']['x'], segmentation['segments']['y'])]
-            polygon = Polygon(polygon_points)
+        if detection['name'] != 'basketball':
+            # 바운딩 박스의 중심 좌표 계산
+            box = detection['box']
+            center_x = (box['x1'] + box['x2']) / 2
+            center_y = box['y2']
+            center_point = Point(center_x, center_y)
             
-            # 바운딩 박스 중심이 세그멘테이션 폴리곤 내에 있는지 확인
-            if polygon.contains(center_point):
-                if segmentation['name'] == 'basketball-court':
-                    if 'position_name' not in detection:
-                        detection['position_name'] = segmentation['name']        
-                else:
-                    detection['position_name'] = segmentation['name']
-                isInside = True
-        if isInside == True:
+            isInside = False
+            for segmentation in segmentations:
+                # 세그멘테이션 폴리곤 생성
+                polygon_points = [(x, y) for x, y in zip(segmentation['segments']['x'], segmentation['segments']['y'])]
+                polygon = Polygon(polygon_points)
+                
+                # 바운딩 박스 중심이 세그멘테이션 폴리곤 내에 있는지 확인
+                if polygon.contains(center_point):
+                    if segmentation['name'] == 'basketball-court':
+                        if 'position_name' not in detection:
+                            detection['position_name'] = segmentation['name']        
+                    else:
+                        detection['position_name'] = segmentation['name']
+                    isInside = True
+            if isInside == True:
+                new_detection.append(detection)
+        else:
             new_detection.append(detection)
+
             
     return new_detection

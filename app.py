@@ -82,7 +82,6 @@ def get_video():
 
         teamA = data['team_a_color']
         teamB = data['team_b_color']
-        teamB = 'White'
 
         # Step 2: & Step 3: & Step 4:
         # 가져온 영상 프레임 별로 분할
@@ -99,6 +98,7 @@ def get_video():
         object_name = payload + '/'  # Optional
         # s3.upload_file(file_name1 + 'frames.pkl', bucket_name1, object_name + 'frames.pkl')
         s3.upload_file(file_name1 + 'player_positions_filtered.json', bucket_name1, object_name + payload + '.json')
+        s3.upload_file(file_name1 + 'ball.json', bucket_name1, object_name + payload + '_ball.json')
         # 로컬파일경로 + 파일명 + 파일종류, 버킷명, s3버킷의 원하는경로 + 파일명 + 파일종류
 
         ################################################################ 밑에 주석 풀면 로컬파일 삭제 됨. ################################################################
