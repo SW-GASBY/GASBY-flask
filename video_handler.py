@@ -103,7 +103,7 @@ flann = cv2.FlannBasedMatcher(index_params, search_params)
 
 list = []
 class VideoHandler:
-    def __init__(self, video, frame_skip=3):
+    def __init__(self, video, frame_skip=1):
         self.video = video
         self.frames = []
         self.frame_skip = frame_skip # frame_skip이 1이면 모든 프레임 처리, 2이면 매 2번째 프레임만 처리
