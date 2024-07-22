@@ -5,7 +5,6 @@ import re
 import numpy as np
 from ultralytics import YOLO
 import json
-import pickle
 from player_tracking import player_tracking
 from shapely.geometry import Point, Polygon
 
@@ -119,7 +118,7 @@ class VideoHandler:
             else:
                 if frame_count % self.frame_skip == 0:
                     # 프레임을 리스트에 추가
-                    self.frames.append(frame)
+                    # self.frames.append(frame)
                     
                     # 이미지를 객체로 탐지
                     detections = detect_objects(frame, detection_model)
@@ -157,10 +156,6 @@ class VideoHandler:
 
         # JSON 파일 저장 경로 수정
         save_list_to_json(list, source + '/data.json')
-        
-        # 모든 프레임을 pkl 파일로 저장
-        with open(source + '/frames.pkl', 'wb') as f:
-            pickle.dump(self.frames, f)
 
         player_tracking(source, teamA, teamB)
 
