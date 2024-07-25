@@ -1,6 +1,6 @@
 <div align="center">
 
-# BING: Flask Server for YOLOv8
+# BING: Flask Server for YOLOv8
 
 *BING 서비스 객체 인식에 사용된 python code 및 API code 입니다.*
 
@@ -12,15 +12,15 @@
 
 **SW중심대학 디지털 경진대회** : SW와 생성 AI의 만남 - SW 부문
 팀 GASBY의 BING 서비스
-이 리포지토리는 팀 GASBY가 SW중심대학 디지털 경진대회에서 개발한 BING 서비스에 사용된 AWS Lambda 함수의 코드를 포함하고 있습니다. 본 프로젝트는 생성 AI 기술을 활용하여 사용자의 요구에 맞는 다양한 소프트웨어 솔루션을 제공합니다.
+이 리포지토리는 팀 GASBY가 SW중심대학 디지털 경진대회에서 개발한 BING 서비스에 사용된 Flask Server 함수의 코드를 포함하고 있습니다. 본 프로젝트는 생성 AI 기술을 활용하여 사용자의 요구에 맞는 다양한 소프트웨어 솔루션을 제공합니다.
 
 **레포지토리 개요**: 
-BING 서비스는 최신 생성 AI 알고리즘을 사용하여 실시간으로 데이터를 처리하고 사용자에게 맞춤형 결과를 제공합니다. 이 프로젝트는 서버리스 아키텍처를 기반으로 하며, AWS Lambda를 핵심 컴퓨팅 리소스로 사용합니다.
+BING 서비스는 최신 생성 AI 알고리즘을 사용하여 실시간으로 데이터를 처리하고 사용자에게 맞춤형 결과를 제공합니다. 이 프로젝트는 YOLOv8을 사용해 객체 인식 및 경기장 segmentation, 선수의 유니품 색상 classification을 위해서 사용합니다.
 
 **주요 기능**: 
-실시간 데이터 처리: 사용자의 요청을 실시간으로 처리하여 빠르고 정확한 결과를 제공합니다.
-생성 AI 통합: 최신 AI 모델을 활용하여 사용자 요구에 맞춤형 결과 생성.
-서버리스 아키텍처: AWS Lambda를 사용하여 확장성과 비용 효율성을 극대화.
+프레임 분할 및 객체 인식: YOLOv8 모델을 사용하여 학습한 파일을 이용하여 경기 영상을 프레임 별로 분할한 뒤에 프레임 내 선수, 심판, 공, 네트 객체들을 인식합니다.
+경기장 코트 segmentation: YOLOv8-seg 모델을 사용하여 학습한 파일을 이용하여 농구 코트를 학습한 뒤에 코트 내에 있는 객체만 인식할 수 있도록 반영했습니다.
+유니폼 색상 분류: YOLOv8-cls 모델을 사용하여 학습한 파일을 이용하여 프레임 내 선수들의 유니폼 색상을 파악합니다.
 
 <br>
 
@@ -30,8 +30,8 @@ BING 서비스는 최신 생성 AI 알고리즘을 사용하여 실시간으로 
 
 | Profile | Name | Role |
 | :---: | :---: | :---: |
-| <a href="https://github.com/anselmo228"><img src="https://avatars.githubusercontent.com/u/24919880?v=4" height="120px"></a> | Heechan Chung <br> **anselmo**| SERVICE MANAGER and Architecture Design <br> Manage AWS S3 buckets, Lambda, and API gateways <br> GPT PROMPTING|
-| <a href="https://github.com/jmin314"><img src="https://avatars.githubusercontent.com/u/30928301?v=4(https://avatars.githubusercontent.com/u/30928301?v=4)" height="120px"></a>| MinSeung Jang <br> **JANG**| MSERVICE MANAGE and Architecture Design <br> CManage AWS S3 buckets, Lambda, and API gateways <br> Managing and Operating Whole sequence of Pipeline|
+| <a href="https://github.com/hspark-1"><img src="https://avatars.githubusercontent.com/u/105943940?v=4" height="120px"></a> | Hyunseo Park <br> **hspark-1**| YOLO object detecting & Uniform Color classify <br> Data collection and selection, model learning and management in the fields of detection and classify|
+| <a href="https://github.com/wooing1084"><img src="https://avatars.githubusercontent.com/u/32007781?v=4" height="120px"></a>| SungHoon Jung <br> **wooing1084**| Data collection and selection, model learning and management in the fields of court segmentation|
 
 <br>
 
