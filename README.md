@@ -56,3 +56,13 @@ BING 서비스는 최신 생성 AI 알고리즘을 사용하여 실시간으로 
 
 ## json_convert.py
 - **Role**: tracked_results.json 파일을 이용하여 프레임 별로 구성되어있는 선수들의 정보를 같은 선수로 분류된 정보끼리 묶어서 json 파일을 변환하여 최종적으로 업로드할 파일을 생성합니다.
+
+## 2. 실행 방법
+1. .env파일을 생성하고 아래와같이 작성합니다.
+```
+AWS_Accesskey= 제공한 AWS 엑세스 키
+AWS_Secretkey= 제공한 AWS 비밀 키
+AWS_Region= 제공한 AWS 리전 정보
+```
+2. 터미널에 flask run --port 5000 입력하거나 파이썬 디버거를 활용해 app.py를 실행한다.
+![image](https://github.com/user-attachments/assets/aaa023e1-9a79-4dcf-b038-c9a8f7c620bb)
