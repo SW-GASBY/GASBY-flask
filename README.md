@@ -12,7 +12,7 @@
 
 **SW중심대학 디지털 경진대회** : SW와 생성 AI의 만남 - SW 부문
 팀 GASBY의 BING 서비스
-이 리포지토리는 팀 GASBY가 SW중심대학 디지털 경진대회에서 개발한 BING 서비스에 사용된 Flask Server 함수의 코드를 포함하고 있습니다. 본 프로젝트는 생성 AI 기술을 활용하여 사용자의 요구에 맞는 다양한 소프트웨어 솔루션을 제공합니다.
+이 리포지토리는 팀 GASBY가 SW중심대학 디지털 경진대회에서 개발한 BING 서비스에 사용된 Flask Server 함수의 코드를 포함하고 있습니다. 본 프로젝트는 생성 AI 기술을 활용하여 사용자의 요구에 맞는 다양한 소프트웨어 솔루션을 제공합니다.
 
 **레포지토리 개요**: 
 BING 서비스는 최신 생성 AI 알고리즘을 사용하여 실시간으로 데이터를 처리하고 사용자에게 맞춤형 결과를 제공합니다. 이 프로젝트는 YOLOv8을 사용해 객체 인식 및 경기장 segmentation, 선수의 유니품 색상 classification을 위해서 사용합니다.
@@ -31,7 +31,7 @@ BING 서비스는 최신 생성 AI 알고리즘을 사용하여 실시간으로 
 | Profile | Name | Role |
 | :---: | :---: | :---: |
 | <a href="https://github.com/hspark-1"><img src="https://avatars.githubusercontent.com/u/105943940?v=4" height="120px"></a> | Hyunseo Park <br> **hspark-1**| YOLO object detecting & Uniform Color classify <br> Data collection and selection, model learning and management in the fields of detection and classify|
-| <a href="https://github.com/wooing1084"><img src="https://avatars.githubusercontent.com/u/32007781?v=4" height="120px"></a>| SungHoon Jung <br> **wooing1084**| Data collection and selection, model learning and management in the fields of court segmentation|
+| <a href="https://github.com/wooing1084"><img src="https://avatars.githubusercontent.com/u/32007781?v=4" height="120px"></a>| SungHoon Jung <br> **wooing1084**| Data collection and selection, model learning and management in the fields of court segmentation|
 
 <br>
 
