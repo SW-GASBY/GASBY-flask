@@ -40,125 +40,19 @@ BING 서비스는 최신 생성 AI 알고리즘을 사용하여 실시간으로 
 
 <br>
 
-## 1. LAMBDA 소개
+## 1. Sever Code 소개
 
-저희는 총 7개의 Lambda 함수를 사용합니다. 각 Lambda 함수는 특정 상황에 따라 동작하며, 각각의 트리거에 따라 작동하여 자동으로 파이프라인이 실행되도록 설계되었습니다. 이로 인해 데이터 처리 및 결과 생성 과정이 원활하고 효율적으로 이루어집니다.
-## upload-gasby-request
-- **Role**: 유저의 영상 업로드 및 요청
-- **Endpoint**: https://nj7ceu0i9c.execute-api.ap-northeast2.amazonaws.com/deploy/request
-
+저희는 총 4개의 py파일을 사용합니다. 
+## app.py
+- **Role**: 유저가 비디오를 업로드 했을 때 aws trigger에서 요청을 보내는 엔드포인트입니다. s3에서 source를 다운로드한 뒤에 로직을 거쳐 선수와 공의 위치에 대한 파일을 업로드합니다.
+- **Endpoint**: http://hostIP:port/yolo-predict/upload
 - **Method**: Post
-- Request Example:
-    
-    ```python
-    import requests
-    import base64
-    
-    url = 'https://nj7ceu0i9c.execute-api.ap-northeast-2.amazonaws.com/deploy/request'
-    
-    # user 요청받아서 만들기
-    file_path = '/Users/jungheechan/Desktop/kakao.mp4'
-    userId = '1'
-    
-    # 파일을 base64로 인코딩
-    with open(file_path, 'rb') as f:
-        file_content = f.read()
-        file_content_base64 = base64.b64encode(file_content).decode('utf-8')
-    
-    # HTTP POST 요청 보내기
-    payload = {
-        'file': file_content_base64,
-        'userId': userId  
-    }
-    
-    response = requests.post(url, json=payload)
-    
-    # 응답 확인
-    print(response.status_code)
-    print(response.json())
-    ```
-    
-- **Trigger: API Gateway**
 
-## **run-mot**
-- **Role**: 유저의 요청에 따른 MOT predict 실행
-- **Endpoint**: Trigger로 작동
+## video_handler.py
+- **Role**: 영상을 프레임별로 분할한 뒤에 YOLOv8 model을 사용하여 객체를 인식하여 data.json 파일을 생성합니다.
 
-- **Trigger: S3- [gasby-req](https://ap-northeast-2.console.aws.amazon.com/s3/buckets/gasby-req?region=ap-northeast-2)**
-- Response:
-    
-    ```python
-    {
-    'payload': userId
-    }
-    ```
-    
+## player_tracking.py
+- **Role**: data.json 파일을 이용해서 프레임별 선수들의 bbox IoU를 계산하여 프레임별 선수의 위치를 예측 및 연결하여 tracked_results.json 파일과 ball.json 파일을 생성합니다.
 
-## run-actrecog
-- **Role**: 유저의 요청에 따른 action recognition predict 실행
-- **Endpoint**: Trigger로 작동
-
-- **Trigger: S3- [gasby-mot-result](https://ap-northeast-2.console.aws.amazon.com/s3/buckets/gasby-mot-result?region=ap-northeast-2)**
-- Response:
-    
-    ```python
-    {
-    'payload': userId
-    }
-    ```
-    
-
-## mot-trigger
-- **Role**: 새로운 pt 파일 생성시 MOT train 실행
-- **Endpoint**: Trigger로 작동
-
-- **Trigger: S3- [gasby-mot](https://ap-northeast-2.console.aws.amazon.com/s3/buckets/gasby-mot?region=ap-northeast-2)**
-- Response:
-    
-    ```python
-     payload = {
-            'file_url': file_url
-        }
-    ```
-    
-
-## actrecog-trigger
-- **Role**: 새로운 pt 파일 생성시 action recognition train 실행
-- **Endpoint**: Trigger로 작동
-
-- **Trigger: S3 -  [gasby-actrecog](https://ap-northeast-2.console.aws.amazon.com/s3/buckets/gasby-actrecog?region=ap-northeast-2)**
-- Response:
-    
-    ```python
-     payload = {
-            'file_url': file_url
-        }
-    ```
-    
-
-### GPT
-- **Role**: 최종 Action Recog 결과물(action.json)으로 해설 생성
-- **Endpoint**: Trigger로 작동
-
-- **Trigger: S3 -** [gasby-actrecog-result](https://ap-northeast-2.console.aws.amazon.com/s3/buckets/gasby-actrecog-result?region=ap-northeast-2)
-
-
-## 2. Architecture
-
-**LAMBDA** : S3에서 트리거를 받아 모델 예측 요청 및 결과값 S3에 저장
-
-
-**s3** : 사용자의 입력, 각 모델의 결과를 저장하기 위한 저장소
-
-
-**on-premise** : 모델 학습, 예측을 위한 GPU 엔드포인트 서버
-
-<img width="852" alt="image" src="https://github.com/user-attachments/assets/b7d47d98-ddc3-4333-b090-e3cf7a575ec5">
-
-
-## 3. Other AWS Resources
-
-- **S3**:
-<img width="1119" alt="Screenshot 2024-07-25 at 9 15 48 PM" src="https://github.com/user-attachments/assets/6a83c2a3-3f7f-4107-b51e-c53d72e06a97">
-
-
+## json_convert.py
+- **Role**: tracked_results.json 파일을 이용하여 프레임 별로 구성되어있는 선수들의 정보를 같은 선수로 분류된 정보끼리 묶어서 json 파일을 변환하여 최종적으로 업로드할 파일을 생성합니다.
